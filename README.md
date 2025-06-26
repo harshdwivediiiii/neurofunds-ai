@@ -112,7 +112,31 @@ ARCJET_KEY=
 - [Framer Motion](https://www.framer.com/motion/)
 - [Three.js Docs](https://threejs.org/docs/)
 
----
+--
+
+<p align="center">
+  <!-- Build Status -->
+  <img src="https://github.com/harshdwivediiiii/neurofunds-ai/actions/workflows/ci.yml/badge.svg" alt="CI Status"/>
+  
+  <!-- Code Coverage -->
+  <img src="https://img.shields.io/codecov/c/github/harshdwivediiiii/neurofunds-ai?style=for-the-badge&token=YOUR_TOKEN_HERE" alt="Coverage"/>
+
+  <!-- License -->
+  <img src="https://img.shields.io/github/license/harshdwivediiiii/neurofunds-ai?style=for-the-badge" alt="License"/>
+
+  <!-- Open Issues -->
+  <img src="https://img.shields.io/github/issues/harshdwivediiiii/neurofunds-ai?style=for-the-badge" alt="Open Issues"/>
+
+  <!-- PRs Welcome -->
+  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge" alt="PRs Welcome"/>
+
+  <!-- Last Commit -->
+  <img src="https://img.shields.io/github/last-commit/harshdwivediiiii/neurofunds-ai?style=for-the-badge" alt="Last Commit"/>
+
+  <!-- GitHub Stars -->
+  <img src="https://img.shields.io/github/stars/harshdwivediiiii/neurofunds-ai?style=for-the-badge" alt="Stars"/>
+</p>
+
 
 ## 🚀 Deploy
 
