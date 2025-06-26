@@ -2,18 +2,18 @@
 > Your all-in-one, AI-powered toolkit for smarter personal finance
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/vercel/next.js/main/docs/static/favicon/favicon.ico" alt="Next.js" height="32"/>
-  <img src="https://raw.githubusercontent.com/tailwindlabs/heroicons/master/.github/logo.svg" alt="Tailwind" height="32"/>
-  <img src="https://raw.githubusercontent.com/inngest/inngest/main/assets/logo.svg" alt="Inngest" height="32"/>
-  <img src="https://app.supabase.com/_next/image?url=%2Fimg%2Fsupabase-logo-icon.png&w=48&q=75" alt="Supabase" height="32"/>
-  <img src="https://raw.githubusercontent.com/prisma/docs/main/website/static/img/prisma-logo.svg" alt="Prisma" height="32"/>
-  <img src="https://raw.githubusercontent.com/google/generative-ai/main/static/favicon.png" alt="Gemini" height="32"/>
-  <img src="https://avatars.githubusercontent.com/u/99196247?s=200&v=4" alt="Resend" height="32"/>
-  <img src="https://avatars.githubusercontent.com/u/133703431?s=200&v=4" alt="Arcjet" height="32"/>
-  <img src="https://raw.githubusercontent.com/clerkinc/clerk.dev/main/public/favicon.png" alt="Clerk" height="32"/>
-  <img src="https://ui.shadcn.com/images/logo.svg" alt="ShadCN UI" height="32"/>
-  <img src="https://raw.githubusercontent.com/framer/motion/main/.github/logo.png" alt="Framer Motion" height="32"/>
-  <img src="https://raw.githubusercontent.com/mrdoob/three.js/dev/files/favicon.ico" alt="Three.js" height="32"/>
+  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js"/>
+  <img src="https://img.shields.io/badge/TailwindCSS-38bdf8?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"/>
+  <img src="https://img.shields.io/badge/Inngest-1A1A1A?style=for-the-badge&logo=Inngest&logoColor=white" alt="Inngest"/>
+  <img src="https://img.shields.io/badge/Supabase-3ecf8e?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase"/>
+  <img src="https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma"/>
+  <img src="https://img.shields.io/badge/Gemini-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Gemini"/>
+  <img src="https://img.shields.io/badge/Resend-000000?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAyNDAgMjQwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnIGZpbGw9IndoaXRlIj48cGF0aCBkPSJNNTguNjc0IDcwLjYxOEw4OC40NDMgODcuODg2VjEzOC41N0w1OC42NzQgMTIxLjMwMlY3MC42MThabTk2LjAxOCA3MC42MTJsMjkuNzY5LTE3LjI2OEwxODQuNzUgNzAuNjE4bC0yOS43NjggMTcuMjY4djM4LjA1NEgxNTQuNjkyVjE0Mi4xN2gyOS43Njh2LTIxLjQzTDIwMC45MTUgNzAuNjE4SDE4NC43NXYtMTYuMzg2aC0yOS43Njh2MTYuMzg2aC0yOS43Njd2MjYuODc1bDI5Ljc2Ny0xNy4yNjh2MzMuNjkySDU4LjY3NFYxNzUuNEgxNzAuMzZ2LTMzLjY5MlpNODguNDQzIDcwLjYxOEgxMTguMjF2NTEuMTQ0SDg4LjQ0M1Y3MC42MThaIi8+PC9nPjwvc3ZnPg==&logoColor=white" alt="Resend"/>
+  <img src="https://img.shields.io/badge/Arcjet-101010?style=for-the-badge&logo=arcjet&logoColor=white" alt="Arcjet"/>
+  <img src="https://img.shields.io/badge/Clerk-3b49df?style=for-the-badge&logo=clerk&logoColor=white" alt="Clerk"/>
+  <img src="https://img.shields.io/badge/Shadcn_UI-000000?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="ShadCN UI"/>
+  <img src="https://img.shields.io/badge/Framer_Motion-EF4444?style=for-the-badge&logo=framer&logoColor=white" alt="Framer Motion"/>
+  <img src="https://img.shields.io/badge/Three.js-000000?style=for-the-badge&logo=three.js&logoColor=white" alt="Three.js"/>
 </p>
 
 ---
