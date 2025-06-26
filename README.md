@@ -84,6 +84,68 @@ ARCJET_KEY=
 ```
 
 ---
+## 🤝 Contributing
+
+We welcome contributions from the community! Whether it's fixing bugs, improving documentation, adding features, or suggesting enhancements, you're more than welcome to help improve **NeuroFunds AI**.
+
+### 🧾 How to Contribute
+
+1. **Fork the repository**
+   - Click the "Fork" button at the top right of this page.
+
+2. **Clone your fork**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/neurofunds-ai.git
+   cd neurofunds-ai
+   ```
+
+3. **Create a new branch**
+   ```bash
+   git checkout -b feat/your-feature-name
+   ```
+
+4. **Make your changes**
+   - Implement your feature or fix.
+   - Ensure everything builds and runs locally.
+   - Write tests if applicable.
+
+5. **Commit your changes**
+   ```bash
+   git commit -m "feat: add [your feature description]"
+   ```
+
+6. **Push to your fork**
+   ```bash
+   git push origin feat/your-feature-name
+   ```
+
+7. **Open a Pull Request**
+   - Go to your forked repository on GitHub
+   - Click "Compare & pull request"
+   - Provide a clear description of your changes
+   - Submit the pull request
+
+---
+
+### 🧰 Development Guidelines
+
+- Follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+  - Example: `feat: add new budget planner AI module`
+- Run `pnpm lint` before pushing
+- Run `pnpm format` to auto-format code
+- Keep your pull requests focused and minimal
+- Use clear, descriptive names for branches and commits
+
+---
+
+### 📌 Suggestions & Issues
+
+- Found a bug? Open an [Issue](https://github.com/harshdwivediiiii/neurofunds-ai/issues)
+- Have a feature request? Let us know in [Discussions](https://github.com/harshdwivediiiii/neurofunds-ai/discussions) or open an issue
+
+Thank you for contributing to NeuroFunds AI 💸!
+
+
 
 ## 📜 Scripts
 
