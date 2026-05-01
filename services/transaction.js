@@ -3,16 +3,80 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import aj from "@/lib/arcjet";
 import { request } from "@arcjet/next";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+import { getGeminiModel } from "@/lib/ai";
+import { getOrCreateDbUser } from "@/lib/auth-user";
 
 const serializeAmount = (obj) => ({
   ...obj,
   amount: obj.amount.toNumber(),
 });
+
+const DEFAULT_EXPENSE_CATEGORY = "other-expense";
+
+async function classifyExpenseCategory(data) {
+  if (data.type !== "EXPENSE" || data.category) {
+    return data.category;
+  }
+  const model = getGeminiModel("gemini-1.5-flash");
+  if (!model) return DEFAULT_EXPENSE_CATEGORY;
+
+  const prompt = `
+Classify this expense into one category:
+housing, transportation, groceries, utilities, entertainment, food, shopping, healthcare, education, personal, travel, insurance, gifts, bills, other-expense.
+
+Description: ${data.description || "N/A"}
+Amount: ${data.amount}
+Return only the category string.
+`;
+  try {
+    const result = await model.generateContent(prompt);
+    const text = (await result.response).text().trim().toLowerCase();
+    return text || DEFAULT_EXPENSE_CATEGORY;
+  } catch {
+    return DEFAULT_EXPENSE_CATEGORY;
+  }
+}
+
+async function detectSubscription(userId, txData) {
+  if (txData.type !== "EXPENSE") return null;
+
+  const thresholdDays = 5;
+  const similar = await db.transaction.findMany({
+    where: {
+      userId,
+      type: "EXPENSE",
+      category: txData.category,
+      description: txData.description ?? undefined,
+    },
+    orderBy: { date: "desc" },
+    take: 5,
+  });
+
+  if (similar.length < 2) return null;
+
+  const deltas = [];
+  for (let i = 1; i < similar.length; i += 1) {
+    const prev = new Date(similar[i - 1].date);
+    const curr = new Date(similar[i].date);
+    const delta = Math.abs((prev - curr) / (1000 * 60 * 60 * 24));
+    deltas.push(delta);
+  }
+  const avgDelta = deltas.reduce((sum, d) => sum + d, 0) / deltas.length;
+
+  if (Math.abs(avgDelta - 30) > thresholdDays) return null;
+
+  return db.subscription.create({
+    data: {
+      userId,
+      name: txData.description || txData.category || "Recurring expense",
+      amount: txData.amount,
+      interval: "MONTHLY",
+      confidenceScore: 0.72,
+    },
+  });
+}
 
 // Create Transaction
 export async function createTransaction(data) {
@@ -20,39 +84,32 @@ export async function createTransaction(data) {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
-    // Get request data for ArcJet
-    const req = await request();
+    if (aj) {
+      const req = await request();
+      const decision = await aj.protect(req, {
+        userId,
+        requested: 1,
+      });
 
-    // Check rate limit
-    const decision = await aj.protect(req, {
-      userId,
-      requested: 1, // Specify how many tokens to consume
-    });
+      if (decision.isDenied()) {
+        if (decision.reason.isRateLimit()) {
+          const { remaining, reset } = decision.reason;
+          console.error({
+            code: "RATE_LIMIT_EXCEEDED",
+            details: {
+              remaining,
+              resetInSeconds: reset,
+            },
+          });
 
-    if (decision.isDenied()) {
-      if (decision.reason.isRateLimit()) {
-        const { remaining, reset } = decision.reason;
-        console.error({
-          code: "RATE_LIMIT_EXCEEDED",
-          details: {
-            remaining,
-            resetInSeconds: reset,
-          },
-        });
+          throw new Error("Too many requests. Please try again later.");
+        }
 
-        throw new Error("Too many requests. Please try again later.");
+        throw new Error("Request blocked");
       }
-
-      throw new Error("Request blocked");
     }
 
-    const user = await db.user.findUnique({
-      where: { clerkUserId: userId },
-    });
-
-    if (!user) {
-      throw new Error("User not found");
-    }
+    const user = await getOrCreateDbUser();
 
     const account = await db.account.findUnique({
       where: {
@@ -65,6 +122,8 @@ export async function createTransaction(data) {
       throw new Error("Account not found");
     }
 
+    const category = await classifyExpenseCategory(data);
+
     // Calculate new balance
     const balanceChange = data.type === "EXPENSE" ? -data.amount : data.amount;
     const newBalance = account.balance.toNumber() + balanceChange;
@@ -74,6 +133,7 @@ export async function createTransaction(data) {
       const newTransaction = await tx.transaction.create({
         data: {
           ...data,
+          category,
           userId: user.id,
           nextRecurringDate:
             data.isRecurring && data.recurringInterval
@@ -93,6 +153,19 @@ export async function createTransaction(data) {
     revalidatePath("/dashboard");
     revalidatePath(`/account/${transaction.accountId}`);
 
+    if (!data.isRecurring) {
+      const subscription = await detectSubscription(user.id, {
+        ...data,
+        category,
+      });
+      if (subscription) {
+        await db.transaction.update({
+          where: { id: transaction.id },
+          data: { subscriptionId: subscription.id, isRecurring: true },
+        });
+      }
+    }
+
     return { success: true, data: serializeAmount(transaction) };
   } catch (error) {
     throw new Error(error.message);
@@ -100,14 +173,8 @@ export async function createTransaction(data) {
 }
 
 export async function getTransaction(id) {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
-
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-
-  if (!user) throw new Error("User not found");
+  await auth();
+  const user = await getOrCreateDbUser();
 
   const transaction = await db.transaction.findUnique({
     where: {
@@ -123,14 +190,8 @@ export async function getTransaction(id) {
 
 export async function updateTransaction(id, data) {
   try {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
-
-    const user = await db.user.findUnique({
-      where: { clerkUserId: userId },
-    });
-
-    if (!user) throw new Error("User not found");
+    await auth();
+    const user = await getOrCreateDbUser();
 
     // Get original transaction to calculate balance change
     const originalTransaction = await db.transaction.findUnique({
@@ -197,16 +258,8 @@ export async function updateTransaction(id, data) {
 // Get User Transactions
 export async function getUserTransactions(query = {}) {
   try {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
-
-    const user = await db.user.findUnique({
-      where: { clerkUserId: userId },
-    });
-
-    if (!user) {
-      throw new Error("User not found");
-    }
+    await auth();
+    const user = await getOrCreateDbUser();
 
     const transactions = await db.transaction.findMany({
       where: {
@@ -230,7 +283,10 @@ export async function getUserTransactions(query = {}) {
 // Scan Receipt
 export async function scanReceipt(file) {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = getGeminiModel("gemini-1.5-flash");
+    if (!model) {
+      throw new Error("Gemini API key missing");
+    }
 
     // Convert File to ArrayBuffer
     const arrayBuffer = await file.arrayBuffer();

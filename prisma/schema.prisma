@@ -3,9 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider  = "postgresql" // Neon PostgreSQL
+  url       = env("DATABASE_URL") // Neon pooled URL for runtime
+  directUrl = env("DIRECT_URL") // Neon direct URL for db push/migrations
 }
 
 model User {
@@ -17,6 +17,13 @@ model User {
   transactions  Transaction[]
   accounts      Account[]
   budgets       Budget[]
+  goals         Goal[]
+  subscriptions Subscription[]
+  stats         UserStat?
+  achievements  UserAchievement[]
+  budgetPlans   BudgetPlan[]
+  alerts        SmartAlert[]
+  insights      FinancialInsight[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
@@ -58,9 +65,12 @@ model Transaction {
   account          Account           @relation(fields: [accountId], references: [id], onDelete: Cascade)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
+  subscriptionId   String?
+  subscription     Subscription?     @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([accountId])
+  @@index([subscriptionId])
   @@map("transactions")
 }
 
@@ -76,6 +86,124 @@ model Budget {
 
   @@index([userId])
   @@map("budgets")
+}
+
+model Goal {
+  id           String      @id @default(uuid())
+  title        String
+  targetAmount Decimal
+  savedAmount  Decimal     @default(0)
+  targetDate   DateTime?
+  status       GoalStatus  @default(ACTIVE)
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([userId])
+  @@map("goals")
+}
+
+model Subscription {
+  id              String   @id @default(uuid())
+  name            String
+  amount          Decimal
+  interval        RecurringInterval
+  confidenceScore Float    @default(0.5)
+  isActive        Boolean  @default(true)
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions    Transaction[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@map("subscriptions")
+}
+
+model UserStat {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  points            Int      @default(0)
+  level             Int      @default(1)
+  savingsStreakDays Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("user_stats")
+}
+
+model Achievement {
+  id          String            @id @default(uuid())
+  key         String            @unique
+  title       String
+  description String
+  points      Int               @default(10)
+  users       UserAchievement[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id            String      @id @default(uuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime    @default(now())
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+  @@index([achievementId])
+  @@map("user_achievements")
+}
+
+model BudgetPlan {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  month         Int
+  year          Int
+  currency      String   @default("INR")
+  planDataJson  Json
+  generatedByAI Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, month, year])
+  @@index([userId])
+  @@map("budget_plans")
+}
+
+model SmartAlert {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      AlertType
+  severity  AlertSeverity @default(INFO)
+  message   String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@map("smart_alerts")
+}
+
+model FinancialInsight {
+  id               String      @id @default(uuid())
+  userId           String
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category         InsightType
+  summary          String
+  confidenceScore  Float       @default(0.5)
+  metadataJson     Json?
+  createdAt        DateTime    @default(now())
+
+  @@index([userId, createdAt])
+  @@map("financial_insights")
 }
 
 enum TransactionType {
@@ -99,4 +227,30 @@ enum RecurringInterval {
   WEEKLY
   MONTHLY
   YEARLY
+}
+
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum AlertType {
+  BUDGET_EXCEEDED
+  UNUSUAL_SPENDING
+  SUBSCRIPTION_RENEWAL
+  SAVINGS_GOAL_MISSED
+}
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum InsightType {
+  OVESPEND
+  IMPULSE_SPENDING
+  SAVING_OPPORTUNITY
+  EMOTIONAL_PATTERN
 }

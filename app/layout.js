@@ -1,12 +1,9 @@
-import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/header";
 import { ClerkProvider } from "@clerk/nextjs";
-import { Toaster } from "sonner";
-import { ThemeProvider } from "@/components/Themeprovider";
+import { Toaster } from "@/components/ui/sonner";
 import Footer from "@/components/Footer";
-
-const inter = Inter({ subsets: ["latin"] });
+import { ThemeProvider } from "@/components/Themeprovider";
 
 export const metadata = {
    title: 'NeuroFunds AI - Header',
@@ -17,14 +14,18 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
-
       <html lang="en" suppressHydrationWarning>
-        <body className={`${inter.className}`}>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem  disableTransitionOnChange>
-          <Header />
-
-          <main className="min-h-screen">{children}</main>
-          <Toaster richColors />
+        <body className="font-sans">
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+            storageKey="neurofunds-theme"
+          >
+            <Header />
+            <main className="min-h-screen">{children}</main>
+            <Toaster richColors />
           </ThemeProvider>
           <Footer />
         </body>
